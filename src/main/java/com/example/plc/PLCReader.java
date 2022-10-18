@@ -81,6 +81,28 @@ public class PLCReader {
         System.out.println(writeResponse.getResponseCode("value-1"));
     }
 
+    public void write(short[] value) throws ExecutionException, InterruptedException {
+        if (!connection.getMetadata().canWrite())
+            return;
+        PlcWriteRequest.Builder builder = connection.writeRequestBuilder();
+        final String prefix = "holding-register:";
+        final String suffix = "[1]";
+        for (int i = 0; i < value.length; i++) {
+            builder.addItem("value-" + (i + 1), prefix + (i + 1) + suffix, value[i]);
+        }
+        PlcWriteRequest writeRequest = builder.build();
+        PlcWriteResponse writeResponse = writeRequest.execute().get();
+        for (String fieldName : writeResponse.getFieldNames()) {
+            if(writeResponse.getResponseCode(fieldName) == PlcResponseCode.OK) {
+                System.out.println("Value[" + fieldName + "]: successfully written to device.");
+            }
+            // Something went wrong, to output an error message instead.
+            else {
+                System.out.println("Error[" + fieldName + "]: " + writeResponse.getResponseCode(fieldName).name());
+            }
+        }
+    }
+
     private static void printResponse(PlcReadResponse response) {
         for (String fieldName : response.getFieldNames()) {
             if(response.getResponseCode(fieldName) == PlcResponseCode.OK) {
@@ -112,6 +134,8 @@ public class PLCReader {
         reg[1] = s + "10[2]";
 //        reader.read(reg);
 //        reader.read();
-        reader.write((short) 28);
+//        reader.write((short) 28);
+        short[] value = {100, 113, 126, 139, 147};
+        reader.write(value);
     }
 }
