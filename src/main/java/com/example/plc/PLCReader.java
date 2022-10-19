@@ -6,6 +6,7 @@ import org.apache.plc4x.java.api.exceptions.PlcConnectionException;
 import org.apache.plc4x.java.api.messages.*;
 import org.apache.plc4x.java.api.types.PlcResponseCode;
 
+import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -81,6 +82,25 @@ public class PLCReader {
         System.out.println(writeResponse.getResponseCode("value-1"));
     }
 
+    public void write(int[] value) throws ExecutionException, InterruptedException {
+        if (!connection.getMetadata().canWrite())
+            return;
+        PlcWriteRequest.Builder builder = connection.writeRequestBuilder();
+        String[] values = Arrays.stream(value).mapToObj(String::valueOf).toArray(String[]::new);
+        builder.addItem("value-1", "holding-register:1[20]", values);
+        PlcWriteRequest writeRequest = builder.build();
+        PlcWriteResponse writeResponse = writeRequest.execute().get();
+        for (String fieldName : writeResponse.getFieldNames()) {
+            if(writeResponse.getResponseCode(fieldName) == PlcResponseCode.OK) {
+                System.out.println("Value[" + fieldName + "]: successfully written to device.");
+            }
+            // Something went wrong, to output an error message instead.
+            else {
+                System.out.println("Error[" + fieldName + "]: " + writeResponse.getResponseCode(fieldName).name());
+            }
+        }
+    }
+
     public void write(short[] value) throws ExecutionException, InterruptedException {
         if (!connection.getMetadata().canWrite())
             return;
@@ -90,6 +110,10 @@ public class PLCReader {
         for (int i = 0; i < value.length; i++) {
             builder.addItem("value-" + (i + 1), prefix + (i + 1) + suffix, value[i]);
         }
+//        builder.addItem("value-1", "holding-register:1[20]", value[0], value[1], value[2], value[3], value[4]
+//                , value[5], value[6], value[7], value[8], value[9]
+//                , value[10], value[11], value[12], value[13], value[14]
+//                , value[15], value[16], value[17], value[18], value[19]);
         PlcWriteRequest writeRequest = builder.build();
         PlcWriteResponse writeResponse = writeRequest.execute().get();
         for (String fieldName : writeResponse.getFieldNames()) {
@@ -135,7 +159,17 @@ public class PLCReader {
 //        reader.read(reg);
 //        reader.read();
 //        reader.write((short) 28);
-        short[] value = {100, 113, 126, 139, 147};
+        long start = System.currentTimeMillis();
+//        short[] value = new short[20];
+//        for (int i = 0; i < value.length; i++) {
+//            value[i] = (short) (i + 1);
+//        }
+//        reader.write(value);
+        int[] value = new int[20];
+        for (int i = 0; i < value.length; i++) {
+            value[i] = (2 * i + 2);
+        }
         reader.write(value);
+        System.out.println(System.currentTimeMillis() - start);
     }
 }
