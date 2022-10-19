@@ -9,6 +9,7 @@ import org.apache.plc4x.java.api.types.PlcResponseCode;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.function.IntFunction;
 
 public class PLCReader {
     private PlcConnection connection;
@@ -87,6 +88,14 @@ public class PLCReader {
             return;
         PlcWriteRequest.Builder builder = connection.writeRequestBuilder();
         String[] values = Arrays.stream(value).mapToObj(String::valueOf).toArray(String[]::new);
+//        String[] strings = Arrays.stream(value).mapToObj(String::valueOf).toArray(gen -> new String[value.length]);
+//        String[] strings = Arrays.stream(value).mapToObj(String::valueOf).toArray(new IntFunction<String[]>() {
+//            @Override
+//            public String[] apply(int value) {
+//                System.out.println(value);
+//                return new String[value];
+//            }
+//        });
         builder.addItem("value-1", "holding-register:1[20]", values);
         PlcWriteRequest writeRequest = builder.build();
         PlcWriteResponse writeResponse = writeRequest.execute().get();
@@ -167,7 +176,7 @@ public class PLCReader {
 //        reader.write(value);
         int[] value = new int[20];
         for (int i = 0; i < value.length; i++) {
-            value[i] = (2 * i + 2);
+            value[i] = (2 * i + 3);
         }
         reader.write(value);
         System.out.println(System.currentTimeMillis() - start);
