@@ -1,8 +1,12 @@
 package com.example.annotation;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.reflect.Field;
 
 public class InstrumentCreator {
+    public static final Logger LOGGER = LoggerFactory.getLogger(InstrumentCreator.class);
 
     @MyField(address = 1, instrumentName = "TIC101")
     private final Instrument instrument;
@@ -17,6 +21,8 @@ public class InstrumentCreator {
         Instrument[] instruments = creator();
         instrument = instruments[0];
         instrument2 = instruments[1];
+        LOGGER.info("创建对象1：{}", instrument);
+        LOGGER.info("创建对象2：{}", instrument2);
         System.out.println(instrument);
         System.out.println(instrument2);
     }
