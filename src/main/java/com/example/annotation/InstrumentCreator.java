@@ -1,12 +1,14 @@
 package com.example.annotation;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 
+//@Slf4j
 public class InstrumentCreator {
-    public static final Logger LOGGER = LoggerFactory.getLogger(InstrumentCreator.class);
+    public static final Logger log = LoggerFactory.getLogger(InstrumentCreator.class);
 
     @MyField(address = 1, instrumentName = "TIC101")
     private final Instrument instrument;
@@ -19,30 +21,23 @@ public class InstrumentCreator {
 
     public InstrumentCreator() {
         Instrument[] instruments = creator();
-        instrument = instruments[0];
-        instrument2 = instruments[1];
-        LOGGER.info("创建对象1：{}", instrument);
-        LOGGER.info("创建对象2：{}", instrument2);
-        System.out.println(instrument);
-        System.out.println(instrument2);
+        instrument = instruments[1];
+        instrument2 = instruments[2];
+        log.info("创建对象1：{}", instrument);
+        log.info("创建对象2：{}", instrument2);
     }
 
-    public static Instrument[] creator() {
+    public Instrument[] creator() {
         Class<InstrumentCreator> clazz = InstrumentCreator.class;
         Field[] fields = clazz.getDeclaredFields();
         Instrument[] instruments = new Instrument[fields.length];
         for (int i = 0; i < instruments.length; i++) {
+            log.info("变量名称：{}", fields[i].getName());
             if (fields[i].isAnnotationPresent(MyField.class)) {
                 MyField myField = fields[i].getAnnotation(MyField.class);
                 instruments[i] = new Instrument(myField.address(), myField.instrumentName());
             }
         }
-//        for (Field field : clazz.getDeclaredFields()) {
-//            if (field.isAnnotationPresent(MyField.class)) {
-//                MyField myField = field.getAnnotation(MyField.class);
-//                return new Instrument(myField.address(), myField.instrumentName());
-//            }
-//        }
 
         return instruments;
     }
