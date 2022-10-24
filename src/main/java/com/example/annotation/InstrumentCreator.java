@@ -5,6 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 
 //@Slf4j
 public class InstrumentCreator {
@@ -20,25 +22,26 @@ public class InstrumentCreator {
     }
 
     public InstrumentCreator() {
-        Instrument[] instruments = creator();
-        instrument = instruments[1];
-        instrument2 = instruments[2];
-        log.info("创建对象1：{}", instrument);
-        log.info("创建对象2：{}", instrument2);
+        List<Instrument> instruments = creator();
+        for (Instrument instrument : instruments) {
+            log.info("创建对象：{}", instrument);
+        }
+        instrument = instruments.get(0);
+        instrument2 = instruments.get(1);
     }
 
-    public Instrument[] creator() {
+    public List<Instrument> creator() {
         Class<InstrumentCreator> clazz = InstrumentCreator.class;
         Field[] fields = clazz.getDeclaredFields();
-        Instrument[] instruments = new Instrument[fields.length];
-        for (int i = 0; i < instruments.length; i++) {
-            log.info("变量名称：{}", fields[i].getName());
-            if (fields[i].isAnnotationPresent(MyField.class)) {
-                MyField myField = fields[i].getAnnotation(MyField.class);
-                instruments[i] = new Instrument(myField.address(), myField.instrumentName());
+        List<Instrument> list = new ArrayList<>();
+        for (Field field : fields) {
+            log.info("变量名称：{}", field.getName());
+            if (field.isAnnotationPresent(MyField.class)) {
+                MyField myField = field.getAnnotation(MyField.class);
+                list.add(new Instrument(myField.address(), myField.instrumentName()));
             }
         }
 
-        return instruments;
+        return list;
     }
 }
